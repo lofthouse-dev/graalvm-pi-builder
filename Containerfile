@@ -4,7 +4,9 @@ ARG GRAALVM_VERSION=25.0.2
 ARG JBANG_VERSION=0.125.0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget ca-certificates unzip libi2c-dev \
+    wget ca-certificates unzip \
+    gcc libc-dev zlib1g-dev \
+    libi2c-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget -q \

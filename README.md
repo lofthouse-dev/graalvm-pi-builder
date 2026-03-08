@@ -8,6 +8,7 @@ A general-purpose aarch64 GraalVM build environment matched to Raspberry Pi OS 1
 `debian:bookworm` — the same glibc base as Raspberry Pi OS 12. It bundles:
 
 - **GraalVM Community Edition** (Java 25) with `native-image`
+- **gcc, libc-dev, zlib1g-dev** — native toolchain required by `native-image` to link binaries
 - **libi2c-dev** — I2C headers for compiling FFM bindings against Pi hardware
 - **JBang** — for running Java scripts and one-shot native-image workloads
 
