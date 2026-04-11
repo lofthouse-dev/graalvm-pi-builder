@@ -9,8 +9,7 @@ A general-purpose aarch64 GraalVM build environment matched to Raspberry Pi OS 1
 
 - **GraalVM Community Edition** (Java 25) with `native-image`
 - **gcc, libc-dev, zlib1g-dev** — native toolchain required by `native-image` to link binaries
-- **libi2c-dev** — I2C headers for compiling FFM bindings against Pi hardware
-- **JBang** — for running Java scripts and one-shot native-image workloads
+- **libi2c-dev** — I2C headers for compiling FFM bindings against Pi hardware (required by Pi4J SMBusContext)
 
 The image is version-pinned and reproducible, making it suitable for local development via
 Podman + QEMU and for CI on native arm64 runners.
@@ -68,7 +67,7 @@ As a base image:
 FROM ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25
 ```
 
-As a container for JBang or native-image workloads:
+As a container for native-image workloads:
 
 ```bash
 podman run --rm -v $(pwd):/build:z ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25 \
