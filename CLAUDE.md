@@ -6,8 +6,8 @@
 `debian:bookworm` (same glibc as Raspberry Pi OS 12). It bundles:
 
 - GraalVM Community Edition (Java 25) with `native-image`
-- `libi2c-dev` — I2C headers for Pi hardware FFM bindings
-- JBang — for Java script and one-shot native-image workloads
+- `gcc`, `libc-dev`, `zlib1g-dev` — native toolchain required by `native-image` to link binaries
+- `libi2c-dev` — I2C headers for Pi hardware FFM bindings (required by Pi4J SMBusContext)
 
 ## Image name and tags
 
@@ -23,7 +23,6 @@
 | Tool | Version |
 |---|---|
 | GraalVM CE | 25.0.2 |
-| JBang | 0.125.0 |
 
 ## Build commands
 
