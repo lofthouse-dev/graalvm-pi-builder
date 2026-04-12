@@ -32,17 +32,21 @@ Use the mutable tag to track updates. Pin to a snapshot tag when you need reprod
 
 ## Pulling the image
 
+This is an `linux/arm64`-only image. On x86_64 hosts you must specify the platform explicitly:
+
 ```bash
 # Latest GraalVM 25 on bookworm
-podman pull ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25
-docker pull ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25
+podman pull --platform linux/arm64 ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25
+docker pull --platform linux/arm64 ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25
 
 # Pinned to a specific GraalVM version
-podman pull ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-25.0.2
+podman pull --platform linux/arm64 ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-25.0.2
 
 # Reproducible snapshot
-podman pull ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-25.0.2-20260120
+podman pull --platform linux/arm64 ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-25.0.2-20260120
 ```
+
+On native arm64 hosts (e.g. Raspberry Pi, Apple Silicon) the `--platform` flag is not needed.
 
 ## Using the image
 
@@ -52,10 +56,11 @@ As a base image in a Containerfile or Dockerfile:
 FROM ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25
 ```
 
-Running a native-image build directly:
+Running a native-image build directly (add `--platform linux/arm64` on x86_64 hosts):
 
 ```bash
-podman run --rm -v $(pwd):/build:z ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25 \
+podman run --rm --platform linux/arm64 -v $(pwd):/build:z \
+  ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25 \
   native-image -jar myapp.jar
 ```
 
