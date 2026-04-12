@@ -11,8 +11,8 @@ A general-purpose aarch64 GraalVM build environment matched to Raspberry Pi OS 1
 - **gcc, libc-dev, zlib1g-dev** — native toolchain required by `native-image` to link binaries
 - **libi2c-dev** — I2C headers for compiling FFM bindings against Pi hardware (required by Pi4J SMBusContext)
 
-The image is version-pinned and reproducible, making it suitable for local development via
-Podman + QEMU and for CI on native arm64 runners.
+The image is intended as a build tool, not a runtime base. System library versions follow Debian
+bookworm and will change between builds as security patches land.
 
 ## Use cases
 
@@ -24,17 +24,50 @@ Podman + QEMU and for CI on native arm64 runners.
 
 | Tag | Type | Meaning |
 |---|---|---|
-| `bookworm-graal25` | Mutable | Latest GraalVM 25.x on Debian bookworm; updated in place |
-| `bookworm-25.0.2` | Immutable | Pinned to a specific GraalVM release |
+| `bookworm-graal25` | Mutable | Latest build of GraalVM 25.x on Debian bookworm; updated on each publish |
+| `bookworm-25.0.2` | Rolling | GraalVM version pinned; apt packages reflect the latest bookworm at publish time |
+| `bookworm-25.0.2-YYYYMMDD` | Snapshot | Exact build date — use this tag when you need a fully reproducible reference |
 
-Use the mutable tag to track updates; use the immutable tag to pin a known-good build.
+Use the mutable tag to track updates. Pin to a snapshot tag when you need reproducibility.
 
-## Prerequisites
+## Pulling the image
+
+```bash
+# Latest GraalVM 25 on bookworm
+podman pull ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25
+docker pull ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25
+
+# Pinned to a specific GraalVM version
+podman pull ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-25.0.2
+
+# Reproducible snapshot
+podman pull ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-25.0.2-20260120
+```
+
+## Using the image
+
+As a base image in a Containerfile or Dockerfile:
+
+```dockerfile
+FROM ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25
+```
+
+Running a native-image build directly:
+
+```bash
+podman run --rm -v $(pwd):/build:z ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25 \
+  native-image -jar myapp.jar
+```
+
+## Building locally
+
+### Prerequisites
 
 - [Podman](https://podman.io/)
-- On x86_64 hosts: QEMU aarch64 binfmt support (`make setup-podman`)
+- On x86_64 hosts: QEMU aarch64 binfmt support (`make setup-podman` — Arch Linux only; see
+  your distro docs for other systems)
 
-## Build
+### Makefile targets
 
 ```bash
 # One-time QEMU setup (Arch Linux x86_64 hosts only)
@@ -43,36 +76,39 @@ make setup-podman
 # Dev iteration — builds tagged :latest
 make build-dev
 
-# Named mutable release tag
+# Named mutable release tag (:bookworm-graal25)
 make build
 
-# Both mutable and immutable tags
+# All three tags: mutable, version-pinned, and timestamped snapshot
 make build-release
 ```
 
-`build-dev` is the iteration target during development. `build` and `build-release` are for
-publishing to GHCR.
+`build-dev` is the iteration target during development. `build-release` mirrors what the publish
+workflow pushes to GHCR.
+
+## Publishing via GitHub Actions
+
+Images are published to GHCR manually via a `workflow_dispatch` workflow. To trigger a publish:
+
+1. Go to the [Actions tab](../../actions/workflows/publish.yml) in the repository
+2. Select **Publish container image**
+3. Click **Run workflow**
+4. Optionally override the GraalVM version (defaults to the current release)
+5. Click **Run workflow**
+
+The workflow builds the `linux/arm64` image using QEMU on a standard GitHub-hosted runner and
+pushes all three tags (`bookworm-graalN`, `bookworm-X.Y.Z`, `bookworm-X.Y.Z-YYYYMMDD`) in a
+single build.
 
 ## Updating GraalVM
 
+When a new GraalVM CE release is available:
+
 1. Change `GRAALVM` in `Makefile`
 2. Change the `ARG GRAALVM_VERSION` default in `Containerfile`
-3. Run `make build-release`
-
-## Using the image
-
-As a base image:
-
-```dockerfile
-FROM ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25
-```
-
-As a container for native-image workloads:
-
-```bash
-podman run --rm -v $(pwd):/build:z ghcr.io/lofthouse-dev/graalvm-pi-builder:bookworm-graal25 \
-  native-image -jar myapp.jar
-```
+3. Change the `graalvm_version` default in `.github/workflows/publish.yml`
+4. Push to the repository
+5. Trigger the publish workflow via the Actions tab
 
 ## License
 

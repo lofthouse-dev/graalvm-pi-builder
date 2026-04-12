@@ -1,0 +1,60 @@
+name: Publish container image
+
+on:
+  workflow_dispatch:
+    inputs:
+      graalvm_version:
+        description: "GraalVM CE version to build (e.g. 25.0.2)"
+        required: false
+        default: "25.0.2"
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/lofthouse-dev/graalvm-pi-builder
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute tags
+        id: tags
+        run: |
+          GRAALVM_VERSION="${{ github.event.inputs.graalvm_version }}"
+          MAJOR=$(echo "$GRAALVM_VERSION" | cut -d. -f1)
+          DATE=$(date -u +%Y%m%d)
+          IMAGE="${{ env.IMAGE }}"
+          echo "graalvm_version=${GRAALVM_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tags=${IMAGE}:bookworm-graal${MAJOR},${IMAGE}:bookworm-${GRAALVM_VERSION},${IMAGE}:bookworm-${GRAALVM_VERSION}-${DATE}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Containerfile
+          platforms: linux/arm64
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            GRAALVM_VERSION=${{ steps.tags.outputs.graalvm_version }}
