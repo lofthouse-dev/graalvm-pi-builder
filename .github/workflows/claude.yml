@@ -24,7 +24,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           label_trigger: claude
           claude_args: |
-            --max-turns 8
+            --max-turns 15
             --append-system-prompt "This issue is a task in a routine version-bump chain (GraalVM CE / Pi4J across graalvm-pi-builder, pi4j-graalvm-metadata and pux4j). You cannot run builds here; CI verifies the change once a human opens the PR.
 
             ROUTINE - make the change, commit it to your branch, and post the PR link: updating a pinned version string or reference; an edit that is an obvious, mechanical consequence of the bump (e.g. a matching version in docs or another config file named by the issue).
