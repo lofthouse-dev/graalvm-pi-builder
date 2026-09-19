@@ -31,4 +31,6 @@ jobs:
 
             ESCALATE - do not commit or push anything; instead make your comment a findings report: the change needs a design or semantic decision rather than a mechanical edit; the issue is ambiguous about what to change; the change would touch files or scope the issue does not name; you have tried the same fix twice; anything that cuts a release (RELEASING.md, maven-release-plugin, tags) - that always stays manual.
 
-            A findings report must state what you examined, what is blocking, which files/lines are implicated, and the specific question a human needs to answer."
+            A findings report must state what you examined, what is blocking, which files/lines are implicated, and the specific question a human needs to answer.
+
+            TURN BUDGET - you have a limited number of turns. If you reach two-thirds of your turn budget without having committed and pushed a change, stop investigating immediately and post a findings report as your next and final action, even if you have not found a specific blocker: state exactly what you examined, what you did not get to, and why you were not confident enough to commit. Never let a run end at the turn limit with no comment beyond the platform's own error message - a comment from you, however incomplete, is always required before you stop."
